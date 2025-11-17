@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-container
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      # 1. 스키마 생성용 SQL (숫자 접두사로 순서 제어)
+      - ./postgresql/10_init_postgres.sql:/docker-entrypoint-initdb.d/10_init_postgres.sql
+      
+      # 2. JSON 적재 쉘 스크립트 (1번보다 나중에 실행되도록)
+      - ./postgresql/11_load_data_from_json.sh:/docker-entrypoint-initdb.d/11_load_data_from_json.sh
+      
+      # 3. 위 쉘 스크립트가 참조할 파일들
+      - ./postgresql/11_load_data_from_json.sql:/init-data/qna/11_load_data_from_json.sql
+      - ./postgresql/data/qna/faq/card_faq.json:/init-data/qna/faq/card_faq.json
+      - ./postgresql/data/qna/term/financial_terms.json:/init-data/qna/term/financial_terms.json
+
+      # 4. 백엔드용 별도 DB 생성 스크립트
+      - ./postgresql/20_init_backend_db.sql:/docker-entrypoint-initdb.d/20_init_backend_db.sql
+
+      # 5. 데이터 영속성 볼륨
+      - ./mount/postgres_data:/var/lib/postgresql/data
+
+  # 2. Redis
+  redis:
+    image: redis:7-alpine
+    container_name: msa-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      # [데이터 영속성] 호스트의 ./redis/data 폴더와 컨테이너의 데이터 폴더 연결
+      - ./mount/redis_data:/data
+      
+      # [설정] 기존 redis.conf 마운트
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"] # conf 파일 사용
+    # ...
+
+# (선택) 명명된 볼륨을 사용하지 않고 위처럼 폴더 경로를 직접 지정(bind mount)하면
+# volumes: 최상위 레벨의 volumes 선언은 필요 없습니다.
