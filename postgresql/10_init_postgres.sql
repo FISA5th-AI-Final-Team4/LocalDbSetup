@@ -44,6 +44,19 @@ CREATE INDEX IF NOT EXISTS idx_faq_search_text ON faqs USING GIN(to_tsvector('si
 CREATE INDEX IF NOT EXISTS idx_faq_normalized_keywords ON faqs USING GIN(normalized_keywords);  -- 정규화 키워드 검색
 CREATE INDEX IF NOT EXISTS idx_faq_user_expressions ON faqs USING GIN(user_expressions);  -- 사용자 표현 검색
 
+-- 동의어 매핑 테이블 (synonym_mappings)
+CREATE TABLE IF NOT EXISTS synonym_mappings (
+    id SERIAL PRIMARY KEY,
+    source_term VARCHAR(200) NOT NULL UNIQUE,  -- 사용자 입력 표현
+    target_terms TEXT[] NOT NULL,  -- 매핑되는 표준 용어들
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 동의어 검색 최적화 인덱스
+CREATE INDEX IF NOT EXISTS idx_synonym_source ON synonym_mappings(source_term);  -- 원본 용어 검색
+CREATE INDEX IF NOT EXISTS idx_synonym_targets ON synonym_mappings USING GIN(target_terms);  -- 대상 용어 배열 검색
+
 -- ============================================================================
 -- 2. 용어 사전 관련 테이블
 -- ============================================================================

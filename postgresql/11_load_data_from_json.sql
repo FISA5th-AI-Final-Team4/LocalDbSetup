@@ -15,6 +15,16 @@
 -- - ON CONFLICT로 중복 데이터 업데이트 (Upsert)
 -- ============================================================================
 
+-- 동의어 매핑 삽입 (synonym_mappings)
+INSERT INTO synonym_mappings (source_term, target_terms)
+SELECT 
+    key::VARCHAR(200),
+    ARRAY(SELECT jsonb_array_elements_text(value))
+FROM jsonb_each(:'faq_json'::jsonb->'metadata'->'synonym_mappings')
+ON CONFLICT (source_term) DO UPDATE SET
+    target_terms = EXCLUDED.target_terms,
+    updated_at = CURRENT_TIMESTAMP;
+
 -- FAQ 카테고리 삽입
 INSERT INTO faq_categories (category_id, category_name, description)
 SELECT 
@@ -94,6 +104,7 @@ DO $$
 BEGIN
     RAISE NOTICE '========================================';
     RAISE NOTICE 'JSON 데이터 적재 완료!';
+    RAISE NOTICE '동의어 매핑: % 개', (SELECT COUNT(*) FROM synonym_mappings);
     RAISE NOTICE 'FAQ 카테고리: % 개', (SELECT COUNT(*) FROM faq_categories);
     RAISE NOTICE 'FAQ 데이터: % 개', (SELECT COUNT(*) FROM faqs);
     RAISE NOTICE '용어 카테고리: % 개', (SELECT COUNT(*) FROM term_categories);
