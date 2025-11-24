@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS faqs (
 CREATE INDEX IF NOT EXISTS idx_faq_category ON faqs(category_id);  -- 카테고리별 필터링
 CREATE INDEX IF NOT EXISTS idx_faq_keywords ON faqs USING GIN(keywords);  -- 키워드 배열 검색
 CREATE INDEX IF NOT EXISTS idx_faq_priority ON faqs(priority DESC);  -- 우선순위 정렬
+CREATE INDEX IF NOT EXISTS idx_faq_views ON faqs(views DESC);  -- 인기 FAQ 정렬
 CREATE INDEX IF NOT EXISTS idx_faq_search_text ON faqs USING GIN(to_tsvector('simple', search_text));  -- 전문 검색
 CREATE INDEX IF NOT EXISTS idx_faq_normalized_keywords ON faqs USING GIN(normalized_keywords);  -- 정규화 키워드 검색
 CREATE INDEX IF NOT EXISTS idx_faq_user_expressions ON faqs USING GIN(user_expressions);  -- 사용자 표현 검색
