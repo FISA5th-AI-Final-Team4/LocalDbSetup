@@ -37,14 +37,13 @@ ON CONFLICT (category_id) DO UPDATE SET
     description = EXCLUDED.description,
     updated_at = CURRENT_TIMESTAMP;
 
--- FAQ 데이터 삽입
-INSERT INTO faqs (faq_id, category_id, question, answer, keywords, search_text, normalized_keywords, user_expressions, priority, views, created_at, updated_at)
+-- FAQ 데이터 삽입 (keywords 필드 제거)
+INSERT INTO faqs (faq_id, category_id, question, answer, search_text, normalized_keywords, user_expressions, priority, views, created_at, updated_at)
 SELECT 
     (elem->>'faq_id')::VARCHAR(20),
     (elem->>'category_id')::VARCHAR(10),
     (elem->>'question')::TEXT,
     (elem->>'answer')::TEXT,
-    ARRAY(SELECT jsonb_array_elements_text(elem->'keywords')),
     (elem->>'search_text')::TEXT,
     ARRAY(SELECT jsonb_array_elements_text(elem->'normalized_keywords')),
     ARRAY(SELECT jsonb_array_elements_text(elem->'user_expressions')),
@@ -57,7 +56,6 @@ ON CONFLICT (faq_id) DO UPDATE SET
     category_id = EXCLUDED.category_id,
     question = EXCLUDED.question,
     answer = EXCLUDED.answer,
-    keywords = EXCLUDED.keywords,
     search_text = EXCLUDED.search_text,
     normalized_keywords = EXCLUDED.normalized_keywords,
     user_expressions = EXCLUDED.user_expressions,
