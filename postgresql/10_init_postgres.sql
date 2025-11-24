@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS terms (
     definition TEXT NOT NULL,
     english VARCHAR(200),
     related_terms TEXT[],  -- 배열 타입
-    examples JSONB,  -- JSON 형태로 예시 저장
+    views INTEGER DEFAULT 0,  -- 조회수
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES term_categories(category_id) ON DELETE CASCADE
@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS terms (
 CREATE INDEX IF NOT EXISTS idx_term_category ON terms(category_id);  -- 카테고리별 필터링
 CREATE INDEX IF NOT EXISTS idx_term_name ON terms(term);  -- 용어명 정확 검색
 CREATE INDEX IF NOT EXISTS idx_term_related ON terms USING GIN(related_terms);  -- 관련 용어 배열 검색
+CREATE INDEX IF NOT EXISTS idx_term_views ON terms(views DESC);  -- 인기 용어 정렬
 
 -- ============================================================================
 -- 3. 데이터 적재 (별도 스크립트 사용)

@@ -78,7 +78,7 @@ ON CONFLICT (category_id) DO UPDATE SET
     updated_at = CURRENT_TIMESTAMP;
 
 -- 용어 데이터 삽입
-INSERT INTO terms (term_id, category_id, term, definition, english, related_terms, examples, created_at, updated_at)
+INSERT INTO terms (term_id, category_id, term, definition, english, related_terms, views, created_at, updated_at)
 SELECT 
     (elem->>'term_id')::VARCHAR(20),
     (elem->>'category_id')::VARCHAR(10),
@@ -86,7 +86,7 @@ SELECT
     (elem->>'definition')::TEXT,
     (elem->>'english')::VARCHAR(200),
     ARRAY(SELECT jsonb_array_elements_text(elem->'related_terms')),
-    elem->'examples',
+    COALESCE((elem->>'views')::INTEGER, 0),
     COALESCE((elem->>'created_at')::TIMESTAMP, CURRENT_TIMESTAMP),
     COALESCE((elem->>'updated_at')::TIMESTAMP, CURRENT_TIMESTAMP)
 FROM jsonb_array_elements(:'term_json'::jsonb->'terms') AS elem
@@ -96,7 +96,7 @@ ON CONFLICT (term_id) DO UPDATE SET
     definition = EXCLUDED.definition,
     english = EXCLUDED.english,
     related_terms = EXCLUDED.related_terms,
-    examples = EXCLUDED.examples,
+    views = EXCLUDED.views,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 완료 메시지
