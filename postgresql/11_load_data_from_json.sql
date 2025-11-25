@@ -37,8 +37,8 @@ ON CONFLICT (category_id) DO UPDATE SET
     description = EXCLUDED.description,
     updated_at = CURRENT_TIMESTAMP;
 
--- FAQ 데이터 삽입 (keywords 필드 제거)
-INSERT INTO faqs (faq_id, category_id, question, answer, search_text, normalized_keywords, user_expressions, priority, views, created_at, updated_at)
+-- FAQ 데이터 삽입 (priority 필드 제거, views 유지)
+INSERT INTO faqs (faq_id, category_id, question, answer, search_text, normalized_keywords, user_expressions, views, created_at, updated_at)
 SELECT 
     (elem->>'faq_id')::VARCHAR(20),
     (elem->>'category_id')::VARCHAR(10),
@@ -47,7 +47,6 @@ SELECT
     (elem->>'search_text')::TEXT,
     ARRAY(SELECT jsonb_array_elements_text(elem->'normalized_keywords')),
     ARRAY(SELECT jsonb_array_elements_text(elem->'user_expressions')),
-    COALESCE((elem->>'priority')::INTEGER, 5),
     COALESCE((elem->>'views')::INTEGER, 0),
     COALESCE((elem->>'created_at')::TIMESTAMP, CURRENT_TIMESTAMP),
     COALESCE((elem->>'updated_at')::TIMESTAMP, CURRENT_TIMESTAMP)
@@ -59,8 +58,7 @@ ON CONFLICT (faq_id) DO UPDATE SET
     search_text = EXCLUDED.search_text,
     normalized_keywords = EXCLUDED.normalized_keywords,
     user_expressions = EXCLUDED.user_expressions,
-    priority = EXCLUDED.priority,
-    views = EXCLUDED.views,
+    -- views는 기존 값 유지 (업데이트하지 않음)
     updated_at = CURRENT_TIMESTAMP;
 
 -- 용어 카테고리 삽입

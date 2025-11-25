@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS faqs (
     search_text TEXT,  -- 전처리된 통합 검색 텍스트
     normalized_keywords TEXT[],  -- 정규화된 키워드 배열 (주요 검색 필드)
     user_expressions TEXT[],  -- 사용자 표현 배열 (높은 가중치)
-    priority INTEGER DEFAULT 5,
     views INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,7 +36,6 @@ CREATE TABLE IF NOT EXISTS faqs (
 
 -- FAQ 검색 최적화 인덱스
 CREATE INDEX IF NOT EXISTS idx_faq_category ON faqs(category_id);  -- 카테고리별 필터링
-CREATE INDEX IF NOT EXISTS idx_faq_priority ON faqs(priority DESC);  -- 우선순위 정렬
 CREATE INDEX IF NOT EXISTS idx_faq_views ON faqs(views DESC);  -- 인기 FAQ 정렬
 CREATE INDEX IF NOT EXISTS idx_faq_search_text ON faqs USING GIN(to_tsvector('simple', search_text));  -- 전문 검색
 CREATE INDEX IF NOT EXISTS idx_faq_normalized_keywords ON faqs USING GIN(normalized_keywords);  -- 정규화 키워드 검색 (주요)
