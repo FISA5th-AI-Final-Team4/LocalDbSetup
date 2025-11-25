@@ -1,6 +1,9 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: postgres-with-bigm:16-alpine
     container_name: postgres-container
     restart: unless-stopped
     environment:
@@ -11,9 +14,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # 0. pg_bigm 확장 설치 스크립트 (최우선 실행)
-      - ./postgresql/00_install_pg_bigm.sh:/docker-entrypoint-initdb.d/00_install_pg_bigm.sh
-      
       # 1. 스키마 생성용 SQL (숫자 접두사로 순서 제어)
       - ./postgresql/10_init_postgres.sql:/docker-entrypoint-initdb.d/10_init_postgres.sql
       
