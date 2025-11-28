@@ -1,1 +1,2 @@
 CREATE DATABASE "ChatDB";
+CREATE DATABASE "mydata";
