@@ -1,8 +1,12 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: postgres-with-bigm:16-alpine
     container_name: postgres-container
     restart: unless-stopped
+    user: root
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -25,8 +29,31 @@ services:
       # 4. 백엔드용 별도 DB 생성 스크립트
       - ./postgresql/20_init_backend_db.sql:/docker-entrypoint-initdb.d/20_init_backend_db.sql
 
-      # 5. 데이터 영속성 볼륨
+      # 5. 클러스터링 DB 스키마 생성
+      - ./postgresql/30_init_clustering_db.sql:/docker-entrypoint-initdb.d/30_init_clustering_db.sql
+      
+      # 6. 클러스터링 데이터 로드 스크립트
+      - ./postgresql/31_load_clustering_data.sh:/docker-entrypoint-initdb.d/31_load_clustering_data.sh
+      
+      # 7. 클러스터링 CSV 데이터 파일들
+      - ./postgresql/clustering/persona_consumption_data.csv:/init-data/clustering/persona_consumption_data.csv
+      - ./postgresql/clustering/clustering_result.csv:/init-data/clustering/clustering_result.csv
+      - ./postgresql/clustering/user_card_usage.csv:/init-data/clustering/user_card_usage.csv
+      - ./postgresql/clustering/cluster_recommended_cards.csv:/init-data/clustering/cluster_recommended_cards.csv
+
+      # 8. 데이터 영속성 볼륨
       - ./mount/postgres_data:/var/lib/postgresql/data
+
+  qdrant: 
+    image: qdrant/qdrant:v1.15
+    container_name: qdrant-container
+    restart: unless-stopped
+    ports:
+      - "6333:6333" # gPRC API 포트
+      - "6334:6334" # REST API 포트 (웹 UI 접속용)
+    volumes:
+      # 사전에 임베딩된 벡터 데이터 마운트
+      - ./qdrant/data/Qdrant_DB:/qdrant/storage
 
   # 2. Redis
   redis:
