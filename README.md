@@ -6,6 +6,17 @@
 
 
 ## 🗃️ ERD
+- **ChatDB** : 채팅/로그 관리
+  
+  <img width="720"  alt="image" src="https://github.com/user-attachments/assets/3500bcac-b8dc-4933-828e-62959d570402" />
+
+- **card_qna_db** : FAQ 맟 금융 용어 데이터 관리
+
+  <img width="450" alt="image" src="https://github.com/user-attachments/assets/b8d083a1-b9cf-4fe5-8cf3-a5baa790de37" />
+
+- **Clustering** : 사용자 소비 데이터 관리
+
+  <img width="460" alt="image" src="https://github.com/user-attachments/assets/f93a9a17-3fd6-456b-8f73-e40c8b8c02c2" />
 
 
 ## ⚒️ 기술 스택
